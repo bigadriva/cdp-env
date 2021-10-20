@@ -1,0 +1,19 @@
+FROM python:3.7
+
+ENV POSTGRESQL_HOST="db"
+ENV POSTGRESQL_PORT="5432"
+ENV POSTGRESQL_DATABASENAME="postgres"
+ENV POSTGRESQL_USER="postgres"
+ENV POSTGRESQL_PASSWORD="Bigarelli251162"
+
+ENV FTP_HOST="201.55.119.243"
+ENV FTP_USER="Driva"
+ENV FTP_PASSWORD="@123driva#"
+
+ENV SHEET_CLIENTS="clients"
+ENV SHEET_POTENTIALS="potentials"
+
+WORKDIR /app
+COPY . .
+RUN pip install -r requirements.txt
+CMD [ "python", "-u", "src/main.py" ]
