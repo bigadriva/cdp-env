@@ -1,78 +1,89 @@
+-- Cliente da driva
 CREATE TABLE company (
-    id SERIAL,
-    cnpj VARCHAR(14) UNIQUE NOT NULL,
-    name VARCHAR(50) NOT NULL,
-    PRIMARY KEY(id)
-);
-
-CREATE TABLE salesperson (
-    id SERIAL,
-    internal_id INTEGER,
-    salesperson_name VARCHAR(50),
-    PRIMARY KEY(id)
-);
-
-CREATE TABLE client (
-    id SERIAL,
-    cnpj VARCHAR(14) NOT NULL,
-    client_name VARCHAR(50) NOT NULL,
-    id_owner_salesperson INTEGER,
-    PRIMARY KEY(id),
-    FOREIGN KEY(id_owner_salesperson) REFERENCES salesperson(id)
-);
-
-CREATE TABLE sale (
-    id SERIAL,
-    data DATE,
-    PRIMARY KEY(id)
+    cnpj VARCHAR(14),
+    name VARCHAR(100),
+    PRIMARY KEY(cnpj)
 );
 
 CREATE TABLE product (
-    id SERIAL,
-    product_id VARCHAR(50),
-    product_name VARCHAR(50),
-    PRIMARY KEY(id)
+    internal_id VARCHAR(100),
+    name VARCHAR(100),
+    type VARCHAR(100),
+    PRIMARY KEY(internal_id)
 );
 
 CREATE TABLE acting_region (
-    id SERIAL,
-    region_id VARCHAR(50),
-    region_name VARCHAR(50)
+    city VARCHAR(100),
+    address VARCHAR(100),
+    neighborhood VARCHAR(100),
+    PRIMARY KEY(city)
 );
 
-CREATE TABLE catarinense_data (
-    id SERIAL,
-    cnpj VARCHAR(50) NOT NULL,
-    area_client VARCHAR(50) NOT NULL,
-    nome_ved_cli VARCHAR(50) NOT NULL,
-    consultor VARCHAR(50) NOT NULL,
-    razao_social VARCHAR(50) NOT NULL,
-    _data DATE NOT NULL,
-    qtd_s_refat INTEGER,
-    qtd_ol INTEGER,
-    valor_fat FLOAT,
-    valor_ol FLOAT,
-    produto VARCHAR(50) NOT NULL,
-    PRIMARY KEY(id)
+CREATE TABLE salesperson (
+    internal_id VARCHAR(100),
+    name VARCHAR(100),
+    company_cnpj VARCHAR(14),
+    PRIMARY KEY(internal_id, name),
+    FOREIGN KEY(company_cnpj) REFERENCES company(cnpj)
 );
 
-CREATE TABLE close_up (
-    id SERIAL,
-    cnpj_pdv VARCHAR(50) NOT NULL,
-    desc_pdv VARCHAR(50),
-    endereco_pdv VARCHAR(50),
-    bairro_pdv VARCHAR(50),
-    cidade_pdv VARCHAR(50),
-    uf_pdv VARCHAR(50),
-    desc_subcanal VARCHAR(50),
-    cat_xarope VARCHAR(50),
-    cat_diges_flaconetes VARCHAR(50),
-    cat_diges_liquidos VARCHAR(50),
-    cat_polivitaminicos VARCHAR(50),
-    cat_fitovital VARCHAR(50),
-    consultor VARCHAR(50),
-    quantidade_ol INTEGER,
-    quantidade_refat INTEGER,
-    data DATE,
-    PRIMARY KEY(id)
+-- Cliente da empresa que é cliente da driva.
+CREATE TABLE client (
+    cnpj VARCHAR(14),
+    name VARCHAR(100),
+    acting_region_city VARCHAR(100) NOT NULL,
+    acting_region_neighborhood VARCHAR(100),
+    acting_region_address VARCHAR(100) NOT NULL,
+    PRIMARY KEY(cnpj),
+    FOREIGN KEY(acting_region_city) REFERENCES acting_region(city)
 );
+
+CREATE TABLE buys_from (
+    company_cnpj VARCHAR(14),
+    client_cnpj VARCHAR(14),
+    PRIMARY KEY(company_cnpj, client_cnpj),
+    FOREIGN KEY(company_cnpj) REFERENCES company(cnpj),
+    FOREIGN KEY(client_cnpj) REFERENCES client(cnpj)
+);
+
+CREATE TABLE sells_to (
+    client_cnpj VARCHAR(14),
+    salesperson_internal_id VARCHAR(100),
+    salesperson_name VARCHAR(100),
+    PRIMARY KEY(client_cnpj, salesperson_internal_id),
+    FOREIGN KEY(client_cnpj) REFERENCES client(cnpj),
+    FOREIGN KEY(salesperson_internal_id, salesperson_name) REFERENCES salesperson(internal_id, name)
+);
+
+CREATE TABLE sells (
+    salesperson_internal_id VARCHAR(100),
+    salesperson_name VARCHAR(100),
+    product_internal_id VARCHAR(100),
+    date DATE NOT NULL,
+    value FLOAT NOT NULL,
+    PRIMARY KEY(salesperson_internal_id, salesperson_name, product_internal_id),
+    FOREIGN KEY(salesperson_internal_id, salesperson_name) REFERENCES salesperson(internal_id, name),
+    FOREIGN KEY(product_internal_id) REFERENCES product(internal_id)
+);
+
+CREATE TABLE acts_in (
+    salesperson_internal_id VARCHAR(100) NOT NULL,
+    salesperson_name VARCHAR(100) NOT NULL,
+    acting_region_city VARCHAR(100) NOT NULL,
+    acting_region_neighborhood VARCHAR(100),
+    acting_region_address VARCHAR(100) NOT NULL,
+    PRIMARY KEY(salesperson_internal_id, salesperson_name, acting_region_city, acting_region_address),
+    FOREIGN KEY(salesperson_internal_id, salesperson_name) REFERENCES salesperson(internal_id, name),
+    FOREIGN KEY(acting_region_city) REFERENCES acting_region(city)
+);
+
+CREATE TABLE characteristics (
+    name_array TEXT[] NOT NULL,
+    value_array FLOAT[] NOT NULL,
+    order_array INTEGER[] NOT NULL,
+    company_cnpj VARCHAR(14) NOT NULL,
+    client_cnpj VARCHAR(14) NOT NULL,
+    PRIMARY KEY(name_array, value_array),
+    FOREIGN KEY(company_cnpj) REFERENCES company(cnpj),
+    FOREIGN KEY(client_cnpj) REFERENCES client(cnpj)
+)
